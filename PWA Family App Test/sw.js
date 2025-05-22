@@ -29,24 +29,21 @@ self.addEventListener('activate', (event) => {
       return Promise.all(
         cacheNames.filter((cacheName) => cacheName !== 'family-app-v3')
           .map((cacheName) => caches.delete(cacheName))
-      );
-    }).then(() => self.clients.claim())
+      ).then(() => self.clients.claim());
+    })
   );
 });
 
 self.addEventListener('fetch', (event) => {
   const requestUrl = new URL(event.request.url);
 
-  // Handle navigation requests (e.g., HTML pages)
   if (event.request.mode === 'navigate') {
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         if (cachedResponse) {
           return cachedResponse;
         }
-        // If not cached, try to fetch from network
         return fetch(event.request).catch(() => {
-          // If fetch fails (offline), try to match the request URL to a cached page
           const path = requestUrl.pathname;
           return caches.match(path).then((pathResponse) => {
             return pathResponse || caches.match('/index.html');
@@ -55,7 +52,6 @@ self.addEventListener('fetch', (event) => {
       })
     );
   } else {
-    // Handle other requests (e.g., CSS, images, fonts)
     event.respondWith(
       caches.match(event.request).then((cachedResponse) => {
         if (cachedResponse) {
@@ -69,7 +65,6 @@ self.addEventListener('fetch', (event) => {
           }
           return networkResponse;
         }).catch(() => {
-          // If fetch fails, return nothing (browser will handle missing assets)
           return new Response('', { status: 404 });
         });
       })
