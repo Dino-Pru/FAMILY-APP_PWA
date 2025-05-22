@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Family App - Petrol</title>
+    <meta name="theme-color" content="#0288d1" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      :root {
+        --light-blue: #4fc3f7;
+        --dark-blue: #0288d1;
+        --white: #ffffff;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        height: 100%;
+      }
+
+      body {
+        font-family: Arial, sans-serif;
+        background-color: var(--white);
+        min-height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .navbar {
+        background-color: var(--dark-blue);
+        padding: 10px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: fixed;
+        width: 100%;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .user-pic {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 1px solid #ccc;
+      }
+
+      .family-name {
+        color: var(--white);
+        font-size: 24px;
+        font-weight: bold;
+        text-align: center;
+        flex: 1;
+      }
+
+      .hamburger {
+        display: none;
+        flex-direction: column;
+        cursor: pointer;
+        gap: 5px;
+      }
+
+      .hamburger span {
+        width: 25px;
+        height: 3px;
+        background-color: var(--white);
+        transition: all 0.3s ease;
+      }
+
+      .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+      }
+
+      .hamburger.active span:nth-child(2) {
+        opacity: 0;
+      }
+
+      .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -7px);
+      }
+
+      .nav-menu {
+        display: flex;
+        gap: 15px;
+      }
+
+      .nav-menu li {
+        list-style: none;
+        position: relative;
+      }
+
+      .nav-menu a {
+        color: var(--white);
+        text-decoration: none;
+        font-size: 18px;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: color 0.3s ease, transform 0.3s ease;
+      }
+
+      .nav-menu a:hover {
+        color: var(--light-blue);
+        transform: scale(1.1);
+      }
+
+      .nav-menu i {
+        font-size: 18px;
+      }
+
+      .submenu {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: var(--dark-blue);
+        min-width: 150px;
+        z-index: 1001;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+      }
+
+      .nav-menu li.active .submenu {
+        display: block;
+      }
+
+      .submenu li {
+        list-style: none;
+      }
+
+      .submenu a {
+        color: var(--white);
+        font-size: 16px;
+        padding: 10px 15px;
+        display: block;
+        transition: background-color 0.3s ease;
+      }
+
+      .submenu a:hover {
+        background-color: var(--light-blue);
+        color: var(--white);
+        transform: none;
+      }
+
+      main {
+        flex: 1;
+        padding: 70px 15px;
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+      }
+
+      section {
+        margin-bottom: 30px;
+      }
+
+      section h2 {
+        color: var(--dark-blue);
+        font-size: 22px;
+        margin-bottom: 15px;
+        text-align: center;
+      }
+
+      .utility-form-container {
+        position: sticky;
+        top: 70px;
+        background-color: var(--white);
+        z-index: 999;
+        padding-bottom: 10px;
+      }
+
+      .utility-form {
+        padding: 15px;
+        max-width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .utility-form input,
+      .utility-form button {
+        font-size: 14px;
+        padding: 8px;
+        width: 100%;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+      }
+
+      .utility-form button {
+        background-color: var(--dark-blue);
+        color: var(--white);
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+      }
+
+      .utility-form button:hover {
+        background-color: var(--light-blue);
+      }
+
+      .utility-table {
+        overflow-x: auto;
+        flex: 1;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        min-width: 600px;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid #ddd;
+        font-size: 14px;
+      }
+
+      th {
+        background-color: var(--dark-blue);
+        color: var(--white);
+        font-size: 16px;
+      }
+
+      tr:nth-child(even) {
+        background-color: #f5f5f5;
+      }
+
+      footer {
+        background-color: var(--dark-blue);
+        color: var(--white);
+        text-align: center;
+        padding: 15px;
+        width: 100%;
+      }
+
+      input, textarea, select, button {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      input:focus, textarea:focus, select:focus, button:focus {
+        outline: 2px solid var(--light-blue);
+        outline-offset: 2px;
+      }
+
+      form, input, textarea, select, button {
+        touch-action: manipulation;
+      }
+
+      @media (max-width: 768px) {
+        .hamburger {
+          display: flex;
+        }
+
+        .nav-menu {
+          position: fixed;
+          top: 0;
+          left: -100%;
+          height: 100vh;
+          width: 250px;
+          background-color: var(--dark-blue);
+          flex-direction: column;
+          padding: 60px 15px;
+          transition: left 0.3s ease;
+        }
+
+        .nav-menu.active {
+          left: 0;
+        }
+
+        .nav-menu li {
+          margin: 8px 0;
+        }
+
+        .submenu {
+          display: block;
+          position: static;
+          width: 100%;
+          background-color: #0277bd;
+          margin-top: 5px;
+          border-radius: 0;
+          box-shadow: none;
+        }
+
+        .nav-menu li.active .submenu {
+          display: block;
+        }
+
+        .family-name {
+          font-size: 20px;
+        }
+
+        .user-pic {
+          width: 32px;
+          height: 32px;
+        }
+
+        main {
+          padding: 60px 10px;
+        }
+
+        section h2 {
+          font-size: 20px;
+        }
+
+        th,
+        td {
+          font-size: 12px;
+          padding: 8px;
+        }
+
+        th {
+          font-size: 14px;
+        }
+
+        .utility-form-container {
+          top: 60px;
+        }
+
+        .utility-form {
+          padding: 10px;
+        }
+
+        .utility-form input,
+        .utility-form button {
+          font-size: 14px;
+          padding: 10px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .family-name {
+          font-size: 18px;
+        }
+
+        .user-pic {
+          width: 28px;
+          height: 28px;
+        }
+
+        .nav-menu a {
+          font-size: 16px;
+        }
+
+        .submenu a {
+          font-size: 14px;
+        }
+
+        main {
+          padding: 55px 8px;
+        }
+
+        section h2 {
+          font-size: 18px;
+        }
+
+        th,
+        td {
+          font-size: 11px;
+          padding: 6px;
+        }
+
+        th {
+          font-size: 13px;
+        }
+
+        .utility-form input,
+        .utility-form button {
+          font-size: 13px;
+          padding: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="navbar">
+      <img src="image/user(1).png" alt="User Profile" class="user-pic" />
+      <div class="family-name">Utopians</div>
+      <div class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <ul class="nav-menu">
+        <li>
+          <a href="index.html"><i class="fas fa-home"></i> Home</a>
+        </li>
+        <li>
+          <a href="events.html"><i class="fas fa-calendar-alt"></i> Events</a>
+        </li>
+        <li class="menu-item-with-submenu">
+          <a href="#" class="submenu-toggle"><i class="fas fa-tools"></i> Utilities</a>
+          <ul class="submenu">
+            <li><a href="electricity.html">Electricity</a></li>
+            <li><a href="water.html">Water</a></li>
+            <li><a href="petrol.html">Petrol</a></li>
+          </ul>
+        </li>
+        <li>
+          <a href="maintenance.html"><i class="fas fa-wrench"></i> Maintenance</a>
+        </li>
+        <li>
+          <a href="budgets.html"><i class="fas fa-dollar-sign"></i> Budgets</a>
+        </li>
+        <li>
+          <a href="settings.html"><i class="fas fa-cog"></i> Settings</a>
+        </li>
+        <li>
+          <a href="chat.html"><i class="fas fa-comment"></i> Chat</a>
+        </li>
+      </ul>
+    </nav>
+
+    <main>
+      <section>
+        <h2>Petrol Usage</h2>
+        <div class="utility-form-container">
+          <form class="utility-form" id="petrol-form">
+            <input type="number" id="petrol-usage" placeholder="Usage in Liters" step="0.01" required />
+            <input type="number" id="petrol-cost" placeholder="Cost" step="0.01" required />
+            <input type="date" id="petrol-date" required />
+            <button type="submit">Add Petrol Usage</button>
+          </form>
+        </div>
+      </section>
+
+      <section>
+        <h2>Petrol History</h2>
+        <div class="utility-table" id="petrol-table"></div>
+      </section>
+    </main>
+
+    <footer>
+      <p>© 2025 Utopians Family App</p>
+    </footer>
+
+    <script>
+      const hamburger = document.querySelector(".hamburger");
+      const navMenu = document.querySelector(".nav-menu");
+
+      function toggleMenu() {
+        hamburger.classList.toggle("active");
+        navMenu.classList.toggle("active");
+      }
+
+      hamburger.addEventListener("click", toggleMenu);
+      hamburger.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        toggleMenu();
+      });
+
+      document.querySelectorAll(".nav-menu a").forEach((link) => {
+        const handler = () => {
+          hamburger.classList.remove("active");
+          navMenu.classList.remove("active");
+        };
+        link.addEventListener("click", handler);
+        link.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          handler();
+          window.location.href = link.href;
+        });
+      });
+
+      const submenuToggles = document.querySelectorAll(".submenu-toggle");
+      submenuToggles.forEach((toggle) => {
+        const handler = (e) => {
+          e.preventDefault();
+          const parentLi = toggle.parentElement;
+          const isActive = parentLi.classList.contains("active");
+
+          document.querySelectorAll(".nav-menu li").forEach((li) => {
+            li.classList.remove("active");
+          });
+
+          if (!isActive) {
+            parentLi.classList.add("active");
+          }
+        };
+        toggle.addEventListener("click", handler);
+        toggle.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          handler();
+        });
+      });
+
+      document.querySelectorAll(".submenu a").forEach((link) => {
+        const handler = () => {
+          document.querySelectorAll(".nav-menu li").forEach((li) => {
+            li.classList.remove("active");
+          });
+          hamburger.classList.remove("active");
+          navMenu.classList.remove("active");
+        };
+        link.addEventListener("click", handler);
+        link.addEventListener("touchstart", (e) => {
+          e.preventDefault();
+          handler();
+          window.location.href = link.href;
+        });
+      });
+
+      function displayPetrolData() {
+        const petrolData = JSON.parse(localStorage.getItem("petrolData")) || [];
+        const petrolTable = document.getElementById("petrol-table");
+        let tableHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th>Usage (Liters)</th>
+                <th>Cost</th>
+                <th>Date</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+
+        if (petrolData.length === 0) {
+          tableHTML += `<tr><td colspan="3">No petrol data added yet.</td></tr>`;
+        } else {
+          petrolData.forEach((data) => {
+            const dateObj = new Date(data.date);
+            const formattedDate = dateObj.toLocaleDateString("en-US", {
+              month: "long",
+              day: "numeric",
+              year: "numeric",
+            });
+
+            tableHTML += `
+              <tr>
+                <td>${data.usage}</td>
+                <td>${data.cost.toFixed(2)}</td>
+                <td>${formattedDate}</td>
+              </tr>
+            `;
+          });
+        }
+
+        tableHTML += `
+            </tbody>
+          </table>
+        `;
+        petrolTable.innerHTML = tableHTML;
+      }
+
+      const petrolForm = document.getElementById("petrol-form");
+      petrolForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const usage = parseFloat(document.getElementById("petrol-usage").value);
+        const cost = parseFloat(document.getElementById("petrol-cost").value);
+        const date = document.getElementById("petrol-date").value;
+
+        const petrolData = JSON.parse(localStorage.getItem("petrolData")) || [];
+        petrolData.push({ usage, cost, date });
+        localStorage.setItem("petrolData", JSON.stringify(petrolData));
+
+        petrolForm.reset();
+        displayPetrolData();
+      });
+
+      const submitButton = petrolForm.querySelector("button");
+      submitButton.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        petrolForm.dispatchEvent(new Event("submit"));
+      });
+
+      const inputs = petrolForm.querySelectorAll("input");
+      inputs.forEach((input) => {
+        input.addEventListener("focus", () => {
+          setTimeout(() => {
+            input.scrollIntoView({ behavior: "smooth", block: "center" });
+          }, 300);
+        });
+      });
+
+      displayPetrolData();
+
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+            .then((reg) => console.log("Service Worker registered:", reg))
+            .catch((err) =>
+              console.log("Service Worker registration failed:", err)
+            );
+        });
+      }
+    </script>
+  </body>
+</html>
